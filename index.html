@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111418">
+<title>Minimalist</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#ffffff; --card-2:#f0f1f4; --text:#111418; --muted:#6b7280;
+    --border:#e3e5ea; --accent:#3b82f6; --accent-text:#ffffff;
+    --good:#16a34a; --warn:#d97706; --bad:#dc2626;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1116; --card:#171b22; --card-2:#1f242c; --text:#e6e8eb; --muted:#9aa4b2;
+      --border:#262b34; --accent:#4f8cff; --accent-text:#ffffff;
+      --good:#34d399; --warn:#fbbf24; --bad:#f87171;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.4;
+    padding-bottom:env(safe-area-inset-bottom);
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    background:var(--bg); border-bottom:1px solid var(--border);
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display:flex; align-items:center; gap:12px;
+  }
+  header .back{
+    border:none; background:var(--card-2); color:var(--text);
+    width:38px; height:38px; border-radius:12px; font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  header h1{font-size:19px; margin:0; font-weight:700; flex:1; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  header .tool{
+    border:none; background:var(--card-2); color:var(--text);
+    height:38px; padding:0 12px; border-radius:12px; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; flex:0 0 auto;
+  }
+  main{max-width:640px; margin:0 auto; padding:16px}
+  .muted{color:var(--muted)}
+  .empty{text-align:center; color:var(--muted); padding:56px 16px}
+  .empty .big{font-size:44px; margin-bottom:10px}
+
+  .card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:12px;
+  }
+  .room{padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer}
+  .room:active{background:var(--card-2)}
+  .room .info{flex:1; min-width:0}
+  .room .name{font-weight:650; font-size:17px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .room .sub{font-size:13px; color:var(--muted); margin-top:2px}
+  .room .chev{color:var(--muted); font-size:22px}
+
+  .ring{position:relative; width:46px; height:46px; flex:0 0 auto}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700}
+
+  .item{padding:14px 16px; display:flex; align-items:flex-start; gap:12px}
+  .item + .item{border-top:1px solid var(--border)}
+  .item .body{flex:1; min-width:0}
+  .item .iname{font-weight:600; font-size:16px; word-break:break-word}
+  .item .meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; align-items:center}
+  .item .note{font-size:13px; color:var(--muted); margin-top:6px; word-break:break-word}
+  .badge{font-size:12px; padding:3px 9px; border-radius:999px; font-weight:600; white-space:nowrap}
+  .b-oft{background:color-mix(in srgb,var(--good) 18%,transparent); color:var(--good)}
+  .b-selten{background:color-mix(in srgb,var(--warn) 18%,transparent); color:var(--warn)}
+  .b-nie{background:color-mix(in srgb,var(--bad) 18%,transparent); color:var(--bad)}
+  .stars{font-size:14px; letter-spacing:1px; color:var(--warn)}
+  .stars .off{color:var(--border)}
+  .kebab{border:none;background:transparent;color:var(--muted);font-size:20px;cursor:pointer;
+    padding:2px 6px;border-radius:8px;flex:0 0 auto}
+
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px}
+  .stat{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; text-align:center}
+  .stat .v{font-size:22px; font-weight:750}
+  .stat .l{font-size:11px; color:var(--muted); margin-top:2px; text-transform:uppercase; letter-spacing:.03em}
+
+  .filters{display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px}
+  .chip{border:1px solid var(--border); background:var(--card); color:var(--text);
+    padding:7px 13px; border-radius:999px; font-size:13px; cursor:pointer; white-space:nowrap; font-weight:550}
+  .chip.on{background:var(--accent); color:var(--accent-text); border-color:var(--accent)}
+
+  .target-bar{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:14px}
+  .target-bar .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; font-size:14px}
+  .bar{height:9px; background:var(--card-2); border-radius:999px; overflow:hidden}
+  .bar > span{display:block; height:100%; border-radius:999px; transition:width .3s ease}
+
+  .fab{
+    position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom));
+    background:var(--accent); color:var(--accent-text); border:none;
+    height:56px; padding:0 22px 0 18px; border-radius:999px; font-size:16px; font-weight:650;
+    box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer; z-index:30;
+    display:flex; align-items:center; gap:8px;
+  }
+  .fab .plus{font-size:24px; line-height:1}
+
+  /* Sheet / Modal */
+  .backdrop{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; display:flex; align-items:flex-end;
+    justify-content:center; animation:fade .15s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{background:var(--card); width:100%; max-width:640px; border-radius:22px 22px 0 0;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom)); max-height:92vh; overflow-y:auto;
+    animation:up .22s cubic-bezier(.2,.8,.2,1)}
+  @media (min-width:640px){.backdrop{align-items:center}.sheet{border-radius:22px; max-height:88vh}}
+  @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:translateY(0);opacity:1}}
+  .sheet h2{margin:0 0 16px; font-size:19px}
+  label.field{display:block; margin-bottom:15px}
+  label.field .lab{font-size:13px; color:var(--muted); margin-bottom:6px; display:block; font-weight:600}
+  input[type=text], input[type=number], textarea{
+    width:100%; padding:13px 14px; border:1px solid var(--border); background:var(--card-2);
+    color:var(--text); border-radius:12px; font-size:16px; font-family:inherit;
+  }
+  input:focus, textarea:focus{outline:2px solid var(--accent); outline-offset:0; border-color:transparent}
+  textarea{min-height:64px; resize:vertical}
+  .seg{display:flex; gap:8px}
+  .seg button{flex:1; padding:11px 6px; border:1px solid var(--border); background:var(--card-2);
+    color:var(--text); border-radius:12px; font-size:14px; cursor:pointer; font-weight:600}
+  .seg button.on{background:var(--accent); color:var(--accent-text); border-color:var(--accent)}
+  .rate{display:flex; gap:6px}
+  .rate button{flex:1; padding:10px 0; border:1px solid var(--border); background:var(--card-2);
+    color:var(--warn); border-radius:12px; font-size:22px; cursor:pointer; line-height:1}
+  .rate button.on{background:color-mix(in srgb,var(--warn) 16%,transparent); border-color:var(--warn)}
+  .btn{width:100%; padding:15px; border:none; border-radius:14px; font-size:16px; font-weight:700; cursor:pointer}
+  .btn-primary{background:var(--accent); color:var(--accent-text)}
+  .btn-ghost{background:var(--card-2); color:var(--text)}
+  .btn-danger{background:color-mix(in srgb,var(--bad) 14%,transparent); color:var(--bad)}
+  .btn + .btn{margin-top:10px}
+  .row{display:flex; gap:10px}
+  .row .btn{margin-top:0}
+  .menu-item{display:flex; align-items:center; gap:12px; padding:15px 6px; font-size:16px; cursor:pointer;
+    border-bottom:1px solid var(--border)}
+  .menu-item:last-child{border-bottom:none}
+  .menu-item.danger{color:var(--bad)}
+  .hint{font-size:13px; color:var(--muted); margin-top:-6px; margin-bottom:14px}
+  .toast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%); background:var(--text);
+    color:var(--bg); padding:11px 18px; border-radius:999px; font-size:14px; z-index:60; box-shadow:var(--shadow);
+    animation:fade .15s ease; max-width:90%; text-align:center}
+</style>
+</head>
+<body>
+<header id="hdr"></header>
+<main id="app"></main>
+<button class="fab" id="fab" hidden></button>
+
+<script>
+"use strict";
+
+/* ---------- Datenmodell & Speicherung (nur lokal) ---------- */
+const STORE_KEY = "minimalist_data_v1";
+const SCHEMA_VERSION = 1;
+const USAGE = { oft:"wird oft genutzt", selten:"wird selten genutzt", nie:"wird nie genutzt" };
+
+let data = load();
+let view = { name:"home", roomId:null, filter:"alle" };
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ const d = JSON.parse(raw); if(d && Array.isArray(d.rooms)) return d; }
+  }catch(e){ console.warn("Konnte Daten nicht laden:", e); }
+  return { version:SCHEMA_VERSION, rooms:[] };
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+  catch(e){ toast("Speichern fehlgeschlagen (Speicher voll?)"); }
+}
+function getRoom(id){ return data.rooms.find(r=>r.id===id) || null; }
+
+/* ---------- Helpers ---------- */
+function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function stars(n){ let s=""; for(let i=1;i<=5;i++) s+= i<=n ? "★" : '<span class="off">★</span>'; return s; }
+let toastT;
+function toast(msg){
+  document.querySelectorAll(".toast").forEach(t=>t.remove());
+  const t=el(`<div class="toast">${esc(msg)}</div>`); document.body.appendChild(t);
+  clearTimeout(toastT); toastT=setTimeout(()=>t.remove(),2200);
+}
+
+/* ---------- Render ---------- */
+function render(){ view.name==="home" ? renderHome() : renderRoom(); }
+
+function renderHome(){
+  document.getElementById("hdr").innerHTML =
+    `<h1>Minimalist</h1><button class="tool" id="menuBtn">⋯ Menü</button>`;
+  document.getElementById("menuBtn").onclick = openMenu;
+
+  const app = document.getElementById("app");
+  if(data.rooms.length===0){
+    app.innerHTML = `<div class="empty"><div class="big">🏠</div>
+      <div>Noch keine Räume.</div>
+      <div class="muted" style="margin-top:6px">Lege deinen ersten Raum an und trage ein, was darin steht.</div></div>`;
+  }else{
+    app.innerHTML = "";
+    data.rooms.forEach(r=>{
+      const count = r.items.length;
+      const target = r.target;
+      const pct = target && target>0 ? Math.min(100, Math.round(count/target*100)) : 0;
+      const over = target && count>target;
+      const color = !target ? "var(--muted)" : over ? "var(--bad)" : (pct>=100?"var(--good)":"var(--accent)");
+      const sub = target
+        ? `${count} / ${target} Artikel` + (over?` · ${count-target} über Ziel`:"")
+        : `${count} Artikel`;
+      const ring = target && target>0 ? `
+        <div class="ring"><svg width="46" height="46">
+          <circle cx="23" cy="23" r="19" fill="none" stroke="var(--card-2)" stroke-width="5"/>
+          <circle cx="23" cy="23" r="19" fill="none" stroke="${color}" stroke-width="5"
+            stroke-linecap="round" stroke-dasharray="${2*Math.PI*19}"
+            stroke-dashoffset="${2*Math.PI*19*(1-pct/100)}"/>
+        </svg><div class="num">${count}</div></div>`
+        : `<div class="ring"><svg width="46" height="46">
+             <circle cx="23" cy="23" r="19" fill="none" stroke="var(--card-2)" stroke-width="5"/>
+           </svg><div class="num">${count}</div></div>`;
+      const card = el(`<div class="card"><div class="room">
+          ${ring}
+          <div class="info"><div class="name">${esc(r.name)}</div><div class="sub">${esc(sub)}</div></div>
+          <div class="chev">›</div>
+        </div></div>`);
+      card.querySelector(".room").onclick = ()=>{ view={name:"room",roomId:r.id,filter:"alle"}; render(); scrollTop(); };
+      app.appendChild(card);
+    });
+  }
+  const fab = document.getElementById("fab");
+  fab.hidden = false; fab.innerHTML = `<span class="plus">+</span> Raum`;
+  fab.onclick = ()=>roomDialog();
+}
+
+function renderRoom(){
+  const r = getRoom(view.roomId);
+  if(!r){ view={name:"home",roomId:null,filter:"alle"}; return render(); }
+
+  document.getElementById("hdr").innerHTML =
+    `<button class="back" id="backBtn">‹</button><h1>${esc(r.name)}</h1><button class="tool" id="roomMenu">⋯</button>`;
+  document.getElementById("backBtn").onclick = ()=>{ view={name:"home",roomId:null,filter:"alle"}; render(); scrollTop(); };
+  document.getElementById("roomMenu").onclick = ()=>openRoomMenu(r);
+
+  const total = r.items.length;
+  const oft = r.items.filter(i=>i.usage==="oft").length;
+  const nie = r.items.filter(i=>i.usage==="nie").length;
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  // Statistik
+  app.appendChild(el(`<div class="stats">
+    <div class="stat"><div class="v">${total}</div><div class="l">Artikel</div></div>
+    <div class="stat"><div class="v" style="color:var(--good)">${oft}</div><div class="l">oft genutzt</div></div>
+    <div class="stat"><div class="v" style="color:var(--bad)">${nie}</div><div class="l">nie genutzt</div></div>
+  </div>`));
+
+  // Ziel
+  if(r.target && r.target>0){
+    const pct = Math.min(100, Math.round(total/r.target*100));
+    const over = total>r.target;
+    const col = over?"var(--bad)":(pct>=100?"var(--good)":"var(--accent)");
+    const status = over ? `${total-r.target} über dem Ziel` : `noch ${r.target-total} bis zum Ziel`;
+    app.appendChild(el(`<div class="target-bar">
+      <div class="top"><span>Ziel: max. ${r.target} Artikel</span><span class="muted">${esc(status)}</span></div>
+      <div class="bar"><span style="width:${pct}%;background:${col}"></span></div>
+    </div>`));
+  }
+
+  // Filter
+  const filters = [["alle","Alle"],["oft","Oft"],["selten","Selten"],["nie","Nie"]];
+  const fRow = el(`<div class="filters"></div>`);
+  filters.forEach(([k,label])=>{
+    const c = el(`<button class="chip ${view.filter===k?"on":""}">${label}</button>`);
+    c.onclick=()=>{ view.filter=k; render(); };
+    fRow.appendChild(c);
+  });
+  app.appendChild(fRow);
+
+  // Artikel-Liste
+  let items = r.items.slice();
+  if(view.filter!=="alle") items = items.filter(i=>i.usage===view.filter);
+  items.sort((a,b)=> b.usefulness - a.usefulness || a.name.localeCompare(b.name,"de"));
+
+  if(items.length===0){
+    app.appendChild(el(`<div class="empty"><div class="big">📦</div><div>${
+      total===0 ? "Noch keine Artikel in diesem Raum." : "Keine Artikel in diesem Filter."
+    }</div></div>`));
+  }else{
+    const list = el(`<div class="card"></div>`);
+    items.forEach(it=>{
+      const node = el(`<div class="item">
+        <div class="body">
+          <div class="iname">${esc(it.name)}</div>
+          <div class="meta">
+            <span class="stars" title="Nutzen">${stars(it.usefulness)}</span>
+            <span class="badge b-${it.usage}">${it.usage==="oft"?"oft":it.usage==="selten"?"selten":"nie"} genutzt</span>
+          </div>
+          ${it.note?`<div class="note">${esc(it.note)}</div>`:""}
+        </div>
+        <button class="kebab" aria-label="Bearbeiten">⋯</button>
+      </div>`);
+      node.querySelector(".kebab").onclick = ()=>itemMenu(r,it);
+      node.querySelector(".body").onclick = ()=>itemDialog(r,it);
+      list.appendChild(node);
+    });
+    app.appendChild(list);
+  }
+
+  const fab = document.getElementById("fab");
+  fab.hidden = false; fab.innerHTML = `<span class="plus">+</span> Artikel`;
+  fab.onclick = ()=>itemDialog(r,null);
+}
+
+function scrollTop(){ window.scrollTo(0,0); }
+
+/* ---------- Dialoge (Sheets) ---------- */
+function sheet(innerHTML){
+  const bd = el(`<div class="backdrop"><div class="sheet">${innerHTML}</div></div>`);
+  bd.onclick = (e)=>{ if(e.target===bd) close(); };
+  document.body.appendChild(bd);
+  function close(){ bd.remove(); }
+  return { root:bd, close, q:(s)=>bd.querySelector(s) };
+}
+
+function roomDialog(room){
+  const editing = !!room;
+  const s = sheet(`
+    <h2>${editing?"Raum bearbeiten":"Neuer Raum"}</h2>
+    <label class="field"><span class="lab">Name des Raums</span>
+      <input type="text" id="rn" placeholder="z. B. Küche, Keller, Schlafzimmer" value="${editing?esc(room.name):""}"></label>
+    <label class="field"><span class="lab">Ziel: max. Anzahl Artikel (optional)</span>
+      <input type="number" id="rt" min="0" inputmode="numeric" placeholder="z. B. 20" value="${editing&&room.target?room.target:""}"></label>
+    <div class="hint">Ohne Ziel wird nur die Anzahl der Artikel gezählt.</div>
+    <button class="btn btn-primary" id="ok">${editing?"Speichern":"Raum anlegen"}</button>
+  `);
+  const nameInput = s.q("#rn"); nameInput.focus();
+  s.q("#ok").onclick = ()=>{
+    const name = s.q("#rn").value.trim();
+    if(!name){ nameInput.focus(); return toast("Bitte einen Namen eingeben"); }
+    const tRaw = s.q("#rt").value.trim();
+    const target = tRaw==="" ? null : Math.max(0, parseInt(tRaw,10)||0);
+    if(editing){ room.name=name; room.target=target; }
+    else{ data.rooms.push({ id:uid(), name, target, items:[] }); }
+    save(); s.close(); render();
+  };
+}
+
+function itemDialog(room, item){
+  const editing = !!item;
+  const draft = editing ? {...item} : { usefulness:3, usage:"selten", note:"" };
+  const s = sheet(`
+    <h2>${editing?"Artikel bearbeiten":"Neuer Artikel"}</h2>
+    <label class="field"><span class="lab">Was ist es?</span>
+      <input type="text" id="inm" placeholder="z. B. Standmixer" value="${editing?esc(item.name):""}"></label>
+    <label class="field"><span class="lab">Nutzen (1 = kaum, 5 = sehr wichtig)</span>
+      <div class="rate" id="rate"></div></label>
+    <label class="field"><span class="lab">Nutzung</span>
+      <div class="seg" id="usage">
+        <button data-u="oft">Oft</button><button data-u="selten">Selten</button><button data-u="nie">Nie</button>
+      </div></label>
+    <label class="field"><span class="lab">Notiz (optional)</span>
+      <textarea id="inote" placeholder="z. B. Geschenk, könnte weg …">${editing?esc(item.note||""):""}</textarea></label>
+    <button class="btn btn-primary" id="ok">${editing?"Speichern":"Hinzufügen"}</button>
+  `);
+  // Sterne
+  const rate = s.q("#rate");
+  for(let i=1;i<=5;i++){ const b=el(`<button data-v="${i}">★</button>`); rate.appendChild(b); }
+  function paintRate(){ rate.querySelectorAll("button").forEach(b=>b.classList.toggle("on", +b.dataset.v<=draft.usefulness)); }
+  rate.querySelectorAll("button").forEach(b=> b.onclick=()=>{ draft.usefulness=+b.dataset.v; paintRate(); });
+  paintRate();
+  // Nutzung
+  const usage = s.q("#usage");
+  function paintUsage(){ usage.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.u===draft.usage)); }
+  usage.querySelectorAll("button").forEach(b=> b.onclick=()=>{ draft.usage=b.dataset.u; paintUsage(); });
+  paintUsage();
+
+  const nameInput = s.q("#inm"); if(!editing) nameInput.focus();
+  s.q("#ok").onclick = ()=>{
+    const name = s.q("#inm").value.trim();
+    if(!name){ nameInput.focus(); return toast("Bitte angeben, was es ist"); }
+    const note = s.q("#inote").value.trim();
+    if(editing){ item.name=name; item.usefulness=draft.usefulness; item.usage=draft.usage; item.note=note; }
+    else{ room.items.push({ id:uid(), name, usefulness:draft.usefulness, usage:draft.usage, note, createdAt:Date.now() }); }
+    save(); s.close(); render();
+  };
+}
+
+function itemMenu(room,item){
+  const s = sheet(`
+    <h2>${esc(item.name)}</h2>
+    <div class="menu-item" id="edit">✏️ Bearbeiten</div>
+    <div class="menu-item danger" id="del">🗑️ Löschen</div>
+  `);
+  s.q("#edit").onclick=()=>{ s.close(); itemDialog(room,item); };
+  s.q("#del").onclick=()=>{
+    if(confirm(`„${item.name}“ wirklich löschen?`)){
+      room.items = room.items.filter(i=>i.id!==item.id); save(); s.close(); render();
+    }
+  };
+}
+
+function openRoomMenu(room){
+  const s = sheet(`
+    <h2>${esc(room.name)}</h2>
+    <div class="menu-item" id="edit">✏️ Raum bearbeiten / Ziel</div>
+    <div class="menu-item danger" id="del">🗑️ Raum löschen</div>
+  `);
+  s.q("#edit").onclick=()=>{ s.close(); roomDialog(room); };
+  s.q("#del").onclick=()=>{
+    if(confirm(`Raum „${room.name}“ und alle ${room.items.length} Artikel löschen?`)){
+      data.rooms = data.rooms.filter(r=>r.id!==room.id); save(); s.close();
+      view={name:"home",roomId:null,filter:"alle"}; render(); scrollTop();
+    }
+  };
+}
+
+/* ---------- Menü: Export / Import (nur lokale Dateien) ---------- */
+function openMenu(){
+  const rooms = data.rooms.length;
+  const items = data.rooms.reduce((n,r)=>n+r.items.length,0);
+  const s = sheet(`
+    <h2>Menü</h2>
+    <div class="hint">Alle Daten liegen ausschließlich lokal auf diesem Gerät. ${rooms} Räume · ${items} Artikel.</div>
+    <div class="menu-item" id="exp">📤 Als JSON exportieren</div>
+    <div class="menu-item" id="imp">📥 JSON importieren</div>
+    <div class="menu-item danger" id="wipe">🗑️ Alle Daten löschen</div>
+    <input type="file" id="file" accept="application/json,.json" hidden>
+  `);
+  s.q("#exp").onclick=()=>{ exportJSON(); };
+  s.q("#imp").onclick=()=>{ s.q("#file").click(); };
+  s.q("#file").onchange=(e)=>{ const f=e.target.files[0]; if(f){ s.close(); importFile(f); } };
+  s.q("#wipe").onclick=()=>{
+    if(confirm("Wirklich ALLE Räume und Artikel unwiderruflich löschen?")){
+      data={ version:SCHEMA_VERSION, rooms:[] }; save(); s.close();
+      view={name:"home",roomId:null,filter:"alle"}; render();
+      toast("Alle Daten gelöscht");
+    }
+  };
+}
+
+function exportJSON(){
+  const payload = { app:"Minimalist", version:SCHEMA_VERSION, exportedAt:new Date().toISOString(), rooms:data.rooms };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href=url; a.download=`minimalist-${stamp}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast("Export gestartet");
+}
+
+function importFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let parsed;
+    try{ parsed = JSON.parse(reader.result); }
+    catch(e){ return toast("Datei ist kein gültiges JSON"); }
+    const incoming = normalizeImport(parsed);
+    if(!incoming){ return toast("Kein gültiges Minimalist-Backup"); }
+    importDialog(incoming);
+  };
+  reader.onerror = ()=>toast("Datei konnte nicht gelesen werden");
+  reader.readAsText(file);
+}
+
+function normalizeImport(p){
+  const rooms = Array.isArray(p) ? p : (p && Array.isArray(p.rooms) ? p.rooms : null);
+  if(!rooms) return null;
+  const clean = [];
+  for(const r of rooms){
+    if(!r || typeof r.name!=="string") continue;
+    const items = Array.isArray(r.items) ? r.items.filter(i=>i&&typeof i.name==="string").map(i=>({
+      id: typeof i.id==="string"?i.id:uid(),
+      name: i.name,
+      usefulness: Math.min(5,Math.max(1, parseInt(i.usefulness,10)||3)),
+      usage: ["oft","selten","nie"].includes(i.usage)?i.usage:"selten",
+      note: typeof i.note==="string"?i.note:"",
+      createdAt: typeof i.createdAt==="number"?i.createdAt:Date.now()
+    })) : [];
+    clean.push({
+      id: typeof r.id==="string"?r.id:uid(),
+      name: r.name,
+      target: (r.target===null||r.target===undefined)?null:(Math.max(0,parseInt(r.target,10)||0)),
+      items
+    });
+  }
+  return clean;
+}
+
+function importDialog(incoming){
+  const items = incoming.reduce((n,r)=>n+r.items.length,0);
+  const s = sheet(`
+    <h2>Import</h2>
+    <div class="hint">Gefunden: ${incoming.length} Räume · ${items} Artikel.</div>
+    <button class="btn btn-primary" id="merge">Zu meinen Daten hinzufügen</button>
+    <button class="btn btn-danger" id="replace">Alles ersetzen</button>
+    <button class="btn btn-ghost" id="cancel">Abbrechen</button>
+  `);
+  s.q("#merge").onclick=()=>{
+    const existing = new Set(data.rooms.map(r=>r.id));
+    incoming.forEach(r=>{ if(existing.has(r.id)) r.id=uid(); data.rooms.push(r); });
+    save(); s.close(); view={name:"home",roomId:null,filter:"alle"}; render();
+    toast("Daten hinzugefügt");
+  };
+  s.q("#replace").onclick=()=>{
+    if(confirm("Alle vorhandenen Daten durch den Import ersetzen?")){
+      data={ version:SCHEMA_VERSION, rooms:incoming }; save(); s.close();
+      view={name:"home",roomId:null,filter:"alle"}; render(); toast("Daten ersetzt");
+    }
+  };
+  s.q("#cancel").onclick=()=>s.close();
+}
+
+/* ---------- Service Worker (Offline) ---------- */
+if("serviceWorker" in navigator && location.protocol!=="file:"){
+  window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+
+render();
+</script>
+</body>
+</html>
