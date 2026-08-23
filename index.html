@@ -451,14 +451,32 @@ function openMenu(){
 
 function exportJSON(){
   const payload = { app:"Minimalist", version:SCHEMA_VERSION, exportedAt:new Date().toISOString(), rooms:data.rooms };
-  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const json = JSON.stringify(payload,null,2);
   const stamp = new Date().toISOString().slice(0,10);
-  a.href=url; a.download=`minimalist-${stamp}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  toast("Export gestartet");
+  const fname = `minimalist-${stamp}.json`;
+  const s = sheet(`
+    <h2>Export</h2>
+    <div class="hint">Speichere die Datei oder kopiere den Text – so überträgst du alles auf ein anderes Handy (dort im Menü „JSON importieren").</div>
+    <div class="row"><button class="btn btn-primary" id="dl">💾 Als Datei speichern</button>
+      <button class="btn btn-ghost" id="cp">📋 Kopieren</button></div>
+    <label class="field" style="margin-top:14px"><span class="lab">JSON-Inhalt</span>
+      <textarea id="out" readonly style="min-height:150px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px">${esc(json)}</textarea></label>
+  `);
+  s.q("#dl").onclick = ()=>{
+    try{
+      const blob = new Blob([json], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      toast("Datei gespeichert: "+fname);
+    }catch(e){ toast("Download hier blockiert – bitte kopieren"); }
+  };
+  s.q("#cp").onclick = async ()=>{
+    const ta = s.q("#out");
+    try{ await navigator.clipboard.writeText(json); toast("In Zwischenablage kopiert"); }
+    catch(e){ ta.focus(); ta.select(); try{ document.execCommand("copy"); toast("Kopiert"); }catch(_){ toast("Bitte Text markieren und kopieren"); } }
+  };
 }
 
 function importFile(file){
