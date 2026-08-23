@@ -1,8 +1,8 @@
 /* Minimalist – Service Worker für Offline-Betrieb.
    Kein Netzwerk-Backend: es wird nur die App selbst (lokale Dateien)
    zwischengespeichert. Es werden keine Daten irgendwohin gesendet. */
-const CACHE = "minimalist-v1";
-const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
+const CACHE = "minimalist-v2";
+const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./icon-180.png", "./icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
